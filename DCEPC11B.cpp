@@ -88,16 +88,4 @@ int main()
 }  
 
 
-#include<iosterea>
-#inlcude<stdio.h>
-using namespace std;
-int main()
-{
-	int  x,y;
-	gi(x);
-	gi(y);
-	pln(x+y);
-	
-	
-	
-}
+
