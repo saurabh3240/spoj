@@ -1,1 +1,1 @@
-Do NOT COPY BLINDLTY thank you !!!
+Do NOT COPY BLINDLY thank you !!!
