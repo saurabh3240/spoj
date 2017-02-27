@@ -61,32 +61,85 @@ typedef pair<int,int> pii;
 #define ll long long
 #define pb push_back
 #define MOD 1000000007
-#define limit 10000006
-int prime[limit];
-ll ans[limit];
+#define lim 100005
 
+int readint()
+    {
+       int cc = getc(stdin);
+       for (;cc < '0' || cc > '9';)  cc = getc(stdin);
+       int ret = 0;
+       for (;cc >= '0' && cc <= '9';)
+       {
+          ret = ret * 10 + cc - '0';
+          cc = getc(stdin);
+       }
+      return ret;
+   }
+
+
+unsigned long long mod_pow(unsigned long long num, unsigned long long pow, unsigned long long mod)
+{
+    unsigned long long test;
+    unsigned long long n = num;
+    for(test = 1; pow; pow >>= 1)
+    {
+        if (pow & 1)
+            test = ((test % mod) * (n % mod)) % mod;
+        n = ((n % mod) * (n % mod)) % mod;
+    }
+    return test; /* note this is potentially lossy */
+}
+
+ll gcd(ll a,ll b)
+{	ll r;
+	while(b)
+	{	r= a%b;
+		a = b;
+		b = r;
+	}
+	return a;
+}
+int arr[lim];
+int dp[10][lim];
+void dig(int n)
+{
+	int j = n;
+	while(n)
+	{
+		int x = n%10;
+		dp[x][j]=1;
+		n = n/10; 
+	}
+}
 int main()
 {
-	ans[0]=0;
-	ans[1]=0;
-	for(int i=2;i<limit;i++)
+	for(int i=2;i*i<=lim;i++)
 	{
-		if(prime[i]==0)
+		int x = i*i;
+		for(int j=x;j<=lim;j+=x)
 		{
-			for(int j=i;j<limit;j+=i)
-				if(prime[j]==0)
-				prime[j]=i;
+			arr[j]=1;
 		}
-		ans[i]=ans[i-1]+prime[i];
+	}
+	forup(i,1,lim)
+	{
+		if(arr[i]==0)
+			dig(i);
+	}
+	rep(i,10)
+	{
+		forup(j,1,lim)
+		 dp[i][j]+=dp[i][j-1];
 	}
 	
 	int t;
 	gi(t);
 	while(t--)
 	{
-		int x;
-		gi(x);
-		pln(ans[x]);	
-	}
-	
+		int a,b,d;
+		gi(a);
+		gi(b);
+		gi(d);	
+		cout<<dp[d][b]-dp[d][a-1]<<endl;;
+	}	
 }
