@@ -25,7 +25,7 @@
 #define dforup(i,a,b) for(i=a; i<b; ++i)
 #define dfordn(i,a,b) for(i=a; i>b; --i)
 #define drep(i,a) for(i=0; i<a; ++i)
-#define gi(x) scanf("%d",&x)
+#define gi(x) fastRead_int(x)
 #define gl(x) scanf("%lld",&x)
 #define gd(x) scanf("%lf",&x)
 #define gs(x) scanf("%s",x)
@@ -45,29 +45,52 @@ int N, Q;
 // Variables, that hold current "state" of computation
 int current_answer;
 
-unordered_map<int,int> cnt;
-
+int cnt[1000005];
 // Array to store answers (because the order we achieve them is messed up)
 int answers[200002];
 int BLOCK_SIZE;
 int arr[30003];
+inline void fastRead_int(int &x) {
+    register int c = getchar();
+    x = 0;
+    int neg = 0;
+
+    for(; ((c<48 || c>57) && c != '-'); c = getchar());
+
+    if(c=='-') {
+        neg = 1;
+        c = getchar();
+    }
+
+    for(; c>47 && c<58 ; c = getchar()) {
+        x = (x<<1) + (x<<3) + c - 48;
+    }
+
+    if(neg)
+        x = -x;
+}
+
 
 // We will represent each query as three numbers: L, R, idx. Idx is
 // the position (in original order) of this query.
-pair< pair<int, int>, int> queries[200002];
+
+struct query{
+    int l,r,i;
+};
+struct query queries[200002];
 
 
 // Essential part of Mo's algorithm: comparator, which we will
 // use with std::sort. It is a function, which must return True
 // if query x must come earlier than query y, and False otherwise.
-inline bool mo_cmp(const pair< pair<int, int>, int> &x,
-        const pair< pair<int, int>, int> &y)
+inline bool mo_cmp(struct query &x,
+        struct query &y)
 {
-    int block_x = x.first.first / BLOCK_SIZE;
-    int block_y = y.first.first / BLOCK_SIZE;
+    int block_x = x.l / BLOCK_SIZE;
+    int block_y = y.l / BLOCK_SIZE;
     if(block_x != block_y)
         return block_x < block_y;
-    return x.first.second < y.first.second;
+    return x.r < y.r;
 }
 
 // When adding a number, we first nullify it's effect on current
@@ -90,20 +113,26 @@ inline void remove(int x)
 int main()
 {
     cin.sync_with_stdio(false);
-    cin >> N ;
+    gi(N);
+    //cin >> N ;
     BLOCK_SIZE = static_cast<int>(sqrt(N));
 
     // Read input array
     for(int i = 0; i < N; i++)
-        cin >> arr[i];
+        gi(arr[i]);
 
     // Read input queries, which are 0-indexed. Store each query's
     // original position. We will use it when printing answer.
-    cin>>Q;
+    gi(Q);
 
     for(int i = 0; i < Q; i++) {
-        cin >> queries[i].first.first >> queries[i].first.second;
-        queries[i].second = i;
+        int x,y;
+        gi(x);
+        gi(y);
+        queries[i].l =  --x;
+        queries[i].r = --y;
+        queries[i].i = i;
+
     }
 
     // Sort queries using Mo's special comparator we defined.
@@ -114,9 +143,11 @@ int main()
 
     for(int i = 0; i < Q; i++) {
         // [left, right] is what query we must answer now.
-        int left = queries[i].first.first;
-        int right = queries[i].first.second;
+        int left = queries[i].l;
+        int right = queries[i].r ;
 
+    //    cout<<left<<" "<<right<<endl;
+    //    cout<<cnt.size()<<endl;
         // Usual part of applying Mo's algorithm: moving mo_left
         // and mo_right.
         while(mo_right < right) {
@@ -136,13 +167,14 @@ int main()
             mo_left--;
             add(arr[mo_left]);
         }
+//        cout<<cnt.size()<<endl;
 
         // Store the answer into required position.
-        answers[queries[i].second] = current_answer;
+        answers[queries[i].i] = current_answer;
     }
 
     // We output answers *after* we process all queries.
     for(int i = 0; i < Q; i++)
-        cout << answers[i] << "\n";
+        pin(answers[i]);
     return 0;
 }
