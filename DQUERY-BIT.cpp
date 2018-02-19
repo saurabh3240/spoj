@@ -40,16 +40,7 @@
     #define sc second
     #define pb push_back
     using namespace std;
-    int N, Q;
 
-    // Variables, that hold current "state" of computation
-    int current_answer;
-
-    int cnt[1000005];
-    // Array to store answers (because the order we achieve them is messed up)
-    int answers[200002];
-    int BLOCK_SIZE;
-    int arr[30003];
     inline void fastRead_int(int &x) {
         register int c = getchar();
         x = 0;
@@ -78,103 +69,90 @@
         int l,r,i;
     };
     struct query queries[200002];
-
-
+    int answers[200002];
+    int a[30003];
     // Essential part of Mo's algorithm: comparator, which we will
     // use with std::sort. It is a function, which must return True
     // if query x must come earlier than query y, and False otherwise.
-    inline bool mo_cmp(struct query &x,
-            struct query &y)
+    inline bool mo_cmp(struct query &x,struct query &y)
     {
-        int block_x = x.l / BLOCK_SIZE;
-        int block_y = y.l / BLOCK_SIZE;
-        if(block_x != block_y)
-            return block_x < block_y;
         return x.r < y.r;
     }
 
-    // When adding a number, we first nullify it's effect on current
-    // answer, then update cnt array, then account for it's effect again.
-    inline void add(int x)
-    {
-        cnt[x]++;
-        if(cnt[x]==1)
-            current_answer++;
+
+
+    #define LOGSZ 20  //2^17
+
+    int tree[(1<<LOGSZ)+1];
+    int N ,Q;
+    int p[1000005];
+    // add v to value at x
+    void update(int x, int v) {
+      while(x <= N) {
+        tree[x] += v;
+        x += (x & -x);
+      }
     }
 
-    // Removing is much like adding.
-    inline void remove(int x)
-    {
-        if(cnt[x]==1)
-            current_answer--;
-        cnt[x]--;
+    // get cumulative sum up to and including x
+    int get(int x) {
+      ll res = 0;
+      while(x) {
+        res += tree[x];
+        x -= (x & -x);
+      }
+      return res;
     }
+
+
 
     int main()
     {
-        cin.sync_with_stdio(false);
+        rep(i,1000005)
+            p[i]=-1;
+
         gi(N);
-        //cin >> N ;
-        BLOCK_SIZE = static_cast<int>(sqrt(N));
+        //BLOCK_SIZE = static_cast<int>(sqrt(N));
 
-        // Read input array
-        for(int i = 0; i < N; i++)
-            gi(arr[i]);
+        for(int i = 1; i <=N; i++)
+            gi(a[i]);
 
-        // Read input queries, which are 0-indexed. Store each query's
-        // original position. We will use it when printing answer.
         gi(Q);
-
-        for(int i = 0; i < Q; i++) {
+        queries[0].r=-1;
+        queries[0].l=-1;
+        queries[0].i=0;
+        for(int i = 1; i <=Q; i++) {
             int x,y;
             gi(x);
             gi(y);
-            queries[i].l =  --x;
-            queries[i].r = --y;
+            queries[i].l = x;
+            queries[i].r = y;
             queries[i].i = i;
-
         }
 
         // Sort queries using Mo's special comparator we defined.
-        sort(queries, queries + Q, mo_cmp);
+        sort(queries, queries + Q+1, mo_cmp);
 
-        // Set up current segment [mo_left, mo_right].
-        int mo_left = 0, mo_right = -1;
+        int x = 1;
+        for(int i = 1 ;i <=N; i++) {
 
-        for(int i = 0; i < Q; i++) {
-            // [left, right] is what query we must answer now.
-            int left = queries[i].l;
-            int right = queries[i].r ;
+            if(p[a[i]]!=-1)
+                update(p[a[i]],-1);
 
-        //    cout<<left<<" "<<right<<endl;
-        //    cout<<cnt.size()<<endl;
-            // Usual part of applying Mo's algorithm: moving mo_left
-            // and mo_right.
-            while(mo_right < right) {
-                mo_right++;
-                add(arr[mo_right]);
+            p[a[i]]=i;
+            update(i,1);
+
+            while(queries[x].r==i&& x<=Q)
+            {
+                int xx = get(queries[x].r)-get(queries[x].l-1);
+
+                answers[queries[x].i] =xx;
+                x++;
             }
-            while(mo_right > right) {
-                remove(arr[mo_right]);
-                mo_right--;
-            }
-
-            while(mo_left < left) {
-                remove(arr[mo_left]);
-                mo_left++;
-            }
-            while(mo_left > left) {
-                mo_left--;
-                add(arr[mo_left]);
-            }
-    //        cout<<cnt.size()<<endl;
-
-            // Store the answer into required position.
-            answers[queries[i].i] = current_answer;
         }
 
         // We output answers *after* we process all queries.
-        for(int i = 0; i < Q; i++)
-            pin(answers[i]);
+         for(int i = 1; i <=Q; i++)
+             pin(answers[i]);
         return 0;
     }
