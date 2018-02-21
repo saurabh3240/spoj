@@ -67,6 +67,8 @@ inline void fastRead_int(int &x) {
 int call(int l,int r)
 {
     int t = n-r+l;
+//    cout<<l<<" "<<r<<endl;
+//    cout<<t<<endl;
     if(l>r)
         return 0;
     if(l==r)
@@ -77,7 +79,7 @@ int call(int l,int r)
     if(dp[l][r]!=-1)
         return dp[l][r];
     else
-    {   if(t%2==1)
+    {   if(t%2==0)
         {
             if(arr[l]>=arr[r])
             {
@@ -87,26 +89,36 @@ int call(int l,int r)
             {
                 dp[l][r] = -arr[r]+call(l,r-1);
             }
+//            cout<<dp[l][r]<<" "<<l<<" "<<r<<" "<<t<<endl;
             return dp[l][r];
         }
         else
         {
             int x = max(arr[l]+call(l+1,r),arr[r]+call(l,r-1));
             dp[l][r]=x;
-                return x;
+//            cout<<dp[l][r]<<" "<<l<<" "<<r<<" "<<t<<endl;
+            return x;
 
         }
     }
 }
 int main()
-{
-    rep(i,1002)
+{   int game =1;
+    while(1)
     {
-        rep(j,1002)
-            dp[i][j]=-1;
+        int n;
+        gi(n);
+        if(n==0)
+            break;
+        rep(i,1002)
+        {
+            rep(j,1002)
+                dp[i][j]=-1;
+        }
+        rep(i,n)
+            gi(arr[i]);
+        printf("In game %d, the greedy strategy might lose by as many as %d points.\n",game++,call(0,n-1));
     }
-    gi(n);
-    rep(i,n)
-        gi(arr[i]);
-    cout<<call(0,n-1)<<endl;;
+
+
 }
