@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cmath>
 #include <cstring>
+#include <chrono>
 #include <complex>
 #define endl "\n"
 #define ll long long int
@@ -39,11 +40,6 @@
 #define sc second
 #define pb push_back
 using namespace std;
-int dp[1002][1002];
-int n;
-int arr[1002];
-int ans =0;
-
 inline void fastRead_int(int &x) {
     register int c = getchar();
     x = 0;
@@ -63,61 +59,59 @@ inline void fastRead_int(int &x) {
     if(neg)
         x = -x;
 }
-int call(int l,int r)
+int arr[21][21];
+ll  dp[21][1<<21];
+int n;
+ll solve(int x,int mask)
 {
-    int t = n-r+l;
-//    cout<<l<<" "<<r<<endl;
-//    cout<<t<<endl;
-    if(l>r)
-        return 0;
-    if(l==r)
-    {
-        dp[l][r]=-arr[l];
-        return dp[l][r];
-    }
-    if(dp[l][r]!=-1)
-        return dp[l][r];
-    else
-    {   if(t%2==0)
-        {
-            if(arr[l]>=arr[r])
-            {
-                dp[l][r] = -arr[l]+call(l+1,r);
-            }
-            else
-            {
-                dp[l][r] = -arr[r]+call(l,r-1);
-            }
-//            cout<<dp[l][r]<<" "<<l<<" "<<r<<" "<<t<<endl;
-            return dp[l][r];
-        }
-        else
-        {
-            int x = max(arr[l]+call(l+1,r),arr[r]+call(l,r-1));
-            dp[l][r]=x;
-//            cout<<dp[l][r]<<" "<<l<<" "<<r<<" "<<t<<endl;
-            return x;
+    // cout<<x<<" "<<mask<<endl;
 
+    if(dp[x][mask]!=-1)
+        return dp[x][mask];
+
+    if(x<0)
+        return 0;
+    if(x==0)
+    {
+        rep(i,n)
+        {
+            if(mask&(1<<i))
+            {
+                return arr[i][0];
+            }
         }
     }
+
+    ll ans=0;
+    rep(i,n)
+    {
+        if(arr[i][x]==1&&(mask&1<<i))
+        {
+            ans+=solve(x-1,mask^(1<<i));
+        }
+    }
+    dp[x][mask]=ans;
+    return ans;
+
 }
 int main()
-{   int game =1;
-    while(1)
+{
+    int t;
+    gi(t);
+    rep(i,t)
     {
-        int n;
         gi(n);
-        if(n==0)
-            break;
-        rep(i,1002)
+        rep(i,n)
+            rep(j,n)
+                gi(arr[i][j]);
+
+        rep(i,n)
         {
-            rep(j,1002)
+            rep(j,1<<n)
                 dp[i][j]=-1;
         }
-        rep(i,n)
-            gi(arr[i]);
-        printf("In game %d, the greedy strategy might lose by as many as %d points.\n",game++,call(0,n-1));
+
+        ll ans = solve(n-1,(1<<n)-1);
+        pln(ans);
     }
-
-
 }
